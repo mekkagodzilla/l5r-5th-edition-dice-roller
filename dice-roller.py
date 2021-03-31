@@ -34,6 +34,8 @@ def roll(ring, skill):
         12: ['Explosive Success'],
     }
 
+    
+
     rawResult = {}
 
     for die in range(ring):
@@ -45,6 +47,8 @@ def roll(ring, skill):
         rawResult['Skill die ' + str(die + 1)] = skillDice[face]
     
     pp.pprint(rawResult)
+    print('')
+    print(f"You can keep up to {ring} dice from this roll.\n")
     
 
     # Now let's select the dice we want to keep.
@@ -55,9 +59,34 @@ def roll(ring, skill):
         choice = pyip.inputMenu(choices, lettered=True)
         keptDice[choice] = rawResult[choice]
         del rawResult[choice]
+        pp.pprint(rawResult)
     
-    # now let's make some dice explode
-    # TODO
-
-
+    print("You kept:\n")
     pp.pprint(keptDice)
+    # now let's make some dice explode
+    # we will iterate over the keptDice, and if 'Explosive' is in them, roll a new dice of the same type, and add them to a separate dict.
+    # we will ask for each of those if the player wants to keep them or not.
+    # if there are explosive successes in this explodedDice dict, we need to explose them as well.
+    keptDiceFaces = ",".join(str(x) for x in keptDice.values())
+    if 'Explosive Success' in keptDiceFaces:
+        explodedDice = {}
+        print('You have some dice to explode!\n')
+        for die in keptDice.keys():
+            if 'Explosive Success' in ",".join(keptDice[die]) and 'Ring' in die:
+                explodedDice['extra die from ' + die] = ringDice[random.randint(1, 6)]
+            elif 'Explosive Success' in ",".join(keptDice[die]) and 'Skill' in die:
+                explodedDice['extra die from ' + die] = skillDice[random.randint(1, 12)]
+        print('You got these new dice:\n')
+        pp.pprint(explodedDice)
+
+        #let's select the ones we want to keep.
+        for die in explodedDice.keys():
+            choice = pyip.inputYesNo(prompt=f'Do you want to keep {explodedDice[die]}?\n')
+            if choice == 'yes':
+                keptDice[die] = explodedDice[die]
+    
+
+    print("Final result:\n")
+    pp.pprint(keptDice)
+    
+    #TODO : compute the total successes, opportunity and strife gainde from roll
