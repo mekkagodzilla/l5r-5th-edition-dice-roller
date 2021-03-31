@@ -57,10 +57,13 @@ def roll(ring, skill):
     
     for die in range(ring):
         choices = list(rawResult.keys())
-        choice = pyip.inputMenu(choices, lettered=True)
-        keptDice[choice] = rawResult[choice]
-        del rawResult[choice]
-        pp.pprint(rawResult)
+        choice = pyip.inputMenu(choices + ['No more dice.'], lettered=True)
+        if choice == 'No more dice.':
+            break
+        else:
+            keptDice[choice] = rawResult[choice]
+            del rawResult[choice]
+            pp.pprint(rawResult)
     
     print("You kept:\n")
     pp.pprint(keptDice)
@@ -73,7 +76,9 @@ def roll(ring, skill):
     explodedDice = {}
     
     # recursive explosion
+    hasExplosionHappened = False
     while len(keptDiceToExplode):
+        hasExplosionHappened = True
         print('\n\nYou have some dice to explode!\n')
         # we'll populate our dict of exploded dice
         for k in keptDiceToExplode.keys():
@@ -108,8 +113,9 @@ def roll(ring, skill):
         keptDiceNotToExplode = {key:value for (key, value) in keptDice.items() if 'Explosive' not in value[0]}
         explodedDice = {}
 
-    print('\nAfter all these explosions, you kept:\n')
-    pp.pprint(keptDice)  
+    if hasExplosionHappened:
+        print('\nAfter all these explosions, you kept:\n')
+        pp.pprint(keptDice)  
 
     print("\nFinal result:\n")
     finalList = []
