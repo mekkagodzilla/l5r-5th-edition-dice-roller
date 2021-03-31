@@ -102,5 +102,8 @@ def roll(ring, skill):
 
     print("Final result:\n")
     pp.pprint(keptDice)
+    finalList = []
+    for value in keptDice.values():
+        finalList += value
     
     #TODO : compute the total successes, opportunity and strife gainde from roll
