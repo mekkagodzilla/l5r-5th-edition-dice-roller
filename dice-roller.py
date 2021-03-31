@@ -1,7 +1,7 @@
 #!python3
 '''
 This module contains a function to roll and keep dice
-for the 5th edition of the Legends of the Five Rings (L5R) RPG
+for the 5th edition of the Legends of the Five Rings (L5R) RPG.
 '''
 import random
 import pprint
@@ -10,6 +10,7 @@ import pyinputplus as pyip
 pp = pprint.PrettyPrinter(indent=4)
 
 def roll(ring, skill):
+    '''takes in a ring value and a skill value, returns a tuple of successes, opportunities and strife gained.'''
     ringDice = {
         1: [''],
         2: ['Opportunity', 'Strife'],
@@ -75,16 +76,16 @@ def roll(ring, skill):
     while 'Explosive Success' in keptDiceFaces:
         explodedDice = {}
         print('\n\nYou have some dice to explode!\n')
-        for die in keptDice.keys():
-            if 'Explosive Success' in keptDice[die][0] and 'Ring' in die:
-                explodedDice['extra die from ' + die] = ringDice[random.randint(1, 6)]
-                print('You rolled', explodedDice['extra die from ' + die])
-                keptDice[die][0] = keptDice[die][0].replace('Explosive Success', 'Success')
-            elif 'Explosive Success' in ",".join(keptDice[die]) and 'Skill' in die:
-                explodedDice['extra die from ' + die] = skillDice[random.randint(1, 12)]
-                print('You rolled', explodedDice['extra die from ' + die])
+        for k, v in keptDice.items():
+            if 'Explosive Success' in v[0] and 'Ring' in k:
+                explodedDice['extra die from ' + k] = ringDice[random.randint(1, 6)]
+                print('You rolled', explodedDice['extra die from ' + k])
+                keptDice[k][0] = keptDice[k][0].replace('Explosive Success', 'Success', 1)
+            elif 'Explosive Success' in v[0] and 'Skill' in k:
+                explodedDice['extra die from ' + k] = skillDice[random.randint(1, 12)]
+                print('You rolled', explodedDice['extra die from ' + k])
                 # Remove 'Explosive ' from the kept dice that exploded
-                keptDice[die][0] = keptDice[die][0].replace('Explosive Success', 'Success')
+                keptDice[k][0] = keptDice[k][0].replace('Explosive Success', 'Success', 1)
             
         
         print('You got these new dice:\n')
@@ -106,4 +107,11 @@ def roll(ring, skill):
     for value in keptDice.values():
         finalList += value
     
+
     #TODO : compute the total successes, opportunity and strife gainde from roll
+    successes = finalList.count('Success')
+    opportunities = finalList.count('Opportunity')
+    strife = finalList.count('Strife')
+
+    print(f'You gained {successes} successes, {opportunities} opportunities, and {strife} strife.')
+    return (successes, opportunities, strife)
