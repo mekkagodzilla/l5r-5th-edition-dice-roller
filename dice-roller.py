@@ -26,7 +26,7 @@ def roll(ring, skill):
         4: ['Opportunity'],
         5: ['Opportunity'],
         6: ['Success', 'Strife'],
-        7: ['Success','Strife'],
+        7: ['Success', 'Strife'],
         8: ['Success'],
         9: ['Success'],
         10: ['Success', 'Opportunity'],
@@ -66,16 +66,27 @@ def roll(ring, skill):
     # now let's make some dice explode
     # we will iterate over the keptDice, and if 'Explosive' is in them, roll a new dice of the same type, and add them to a separate dict.
     # we will ask for each of those if the player wants to keep them or not.
-    # if there are explosive successes in this explodedDice dict, we need to explose them as well.
+    # TODO if there are explosive successes in this explodedDice dict, we need to explose them as well.
+    
+
+    # this horror will create a giant string of all the kept dice, just to check if there are Explosive Successes left to explode.
     keptDiceFaces = ",".join(str(x) for x in keptDice.values())
-    if 'Explosive Success' in keptDiceFaces:
+    
+    while 'Explosive Success' in keptDiceFaces:
         explodedDice = {}
-        print('You have some dice to explode!\n')
+        print('\n\nYou have some dice to explode!\n')
         for die in keptDice.keys():
-            if 'Explosive Success' in ",".join(keptDice[die]) and 'Ring' in die:
+            if 'Explosive Success' in keptDice[die][0] and 'Ring' in die:
                 explodedDice['extra die from ' + die] = ringDice[random.randint(1, 6)]
+                print('You rolled', explodedDice['extra die from ' + die])
+                keptDice[die][0] = keptDice[die][0].replace('Explosive Success', 'Success')
             elif 'Explosive Success' in ",".join(keptDice[die]) and 'Skill' in die:
                 explodedDice['extra die from ' + die] = skillDice[random.randint(1, 12)]
+                print('You rolled', explodedDice['extra die from ' + die])
+                # Remove 'Explosive ' from the kept dice that exploded
+                keptDice[die][0] = keptDice[die][0].replace('Explosive Success', 'Success')
+            
+        
         print('You got these new dice:\n')
         pp.pprint(explodedDice)
 
@@ -84,6 +95,9 @@ def roll(ring, skill):
             choice = pyip.inputYesNo(prompt=f'Do you want to keep {explodedDice[die]}?\n')
             if choice == 'yes':
                 keptDice[die] = explodedDice[die]
+        
+        # recreate the string of kept dice for the while loop to check
+        keptDiceFaces = ",".join(str(x) for x in keptDice.values())
     
 
     print("Final result:\n")
