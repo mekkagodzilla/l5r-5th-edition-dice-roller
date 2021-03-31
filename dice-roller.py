@@ -32,7 +32,7 @@ def roll(ring, skill):
         9: ['Success'],
         10: ['Success', 'Opportunity'],
         11: ['Explosive Success', 'Strife'],
-        12: ['Explosive Success'],
+        12: ['Explosive Success', ''],
     }
 
     
@@ -65,50 +65,58 @@ def roll(ring, skill):
     print("You kept:\n")
     pp.pprint(keptDice)
     # now let's make some dice explode
-    # we will iterate over the keptDice, and if 'Explosive' is in them, roll a new dice of the same type, and add them to a separate dict.
+    # This needs to be recursive.
     # we will ask for each of those if the player wants to keep them or not.
-    # TODO if there are explosive successes in this explodedDice dict, we need to explose them as well.
     
-
-    # this horror will create a giant string of all the kept dice, just to check if there are Explosive Successes left to explode.
-    keptDiceFaces = ",".join(str(x) for x in keptDice.values())
+    keptDiceToExplode = {key: value for key, value in keptDice.items() if 'Explosive' in value[0]}
+    keptDiceNotToExplode = {key:value for (key, value) in keptDice.items() if 'Explosive' not in value[0]}
+    explodedDice = {}
     
-    while 'Explosive Success' in keptDiceFaces:
-        explodedDice = {}
+    # recursive explosion
+    while len(keptDiceToExplode):
         print('\n\nYou have some dice to explode!\n')
-        for k, v in keptDice.items():
-            if 'Explosive Success' in v[0] and 'Ring' in k:
-                explodedDice['extra die from ' + k] = ringDice[random.randint(1, 6)]
-                print('You rolled', explodedDice['extra die from ' + k])
-                keptDice[k][0] = keptDice[k][0].replace('Explosive Success', 'Success', 1)
-            elif 'Explosive Success' in v[0] and 'Skill' in k:
-                explodedDice['extra die from ' + k] = skillDice[random.randint(1, 12)]
-                print('You rolled', explodedDice['extra die from ' + k])
-                # Remove 'Explosive ' from the kept dice that exploded
-                keptDice[k][0] = keptDice[k][0].replace('Explosive Success', 'Success', 1)
-            
-        
-        print('You got these new dice:\n')
-        pp.pprint(explodedDice)
-
-        #let's select the ones we want to keep.
-        for die in explodedDice.keys():
-            choice = pyip.inputYesNo(prompt=f'Do you want to keep {explodedDice[die]}?\n')
-            if choice == 'yes':
-                keptDice[die] = explodedDice[die]
-        
-        # recreate the string of kept dice for the while loop to check
-        keptDiceFaces = ",".join(str(x) for x in keptDice.values())
+        # we'll populate our dict of exploded dice
+        for k in keptDiceToExplode.keys():
+            if 'Ring' in k:
+                explodedDice['Extra die from ' + k] = ringDice[random.randint(1, 6)]
+                print(f'You rolled', explodedDice['Extra die from ' + k])
+            elif 'Skill' in k:
+                explodedDice['Extra die from ' + k] = skillDice[random.randint(1, 12)]
+                print(f'You rolled', explodedDice['Extra die from ' + k])
+       
     
+        # Now let's keep some exploded dice
+        keptExplodedDice = {}
+        for die in explodedDice.keys():
+                choice = pyip.inputYesNo(prompt=f'Do you want to keep {explodedDice[die]}?\n')
+                if choice == 'yes':
+                    keptExplodedDice[die] = explodedDice[die]
+        
+        # now generate a new keptDiceThatHaveExploded dic from the values of keptDiceToExplode
+        keptDiceThatHaveExploded = {}
+        for k in keptDiceToExplode.keys():
+            keptDiceThatHaveExploded[k] = [ keptDiceToExplode[k][0].replace('Explosive Success', 'Success'), keptDiceToExplode[k][1] ]
 
-    print("Final result:\n")
-    pp.pprint(keptDice)
+        # now let's reunite our kept dice
+        keptDice = {}
+        keptDice.update(keptDiceNotToExplode)
+        keptDice.update(keptDiceThatHaveExploded)
+        keptDice.update(keptExplodedDice)
+
+        # let's regenerate our 3 temp dicts from above to check if we have new dice to explode
+        keptDiceToExplode = {key: value for key, value in keptDice.items() if 'Explosive' in value[0]}
+        keptDiceNotToExplode = {key:value for (key, value) in keptDice.items() if 'Explosive' not in value[0]}
+        explodedDice = {}
+
+    print('\nAfter all these explosions, you kept:\n')
+    pp.pprint(keptDice)  
+
+    print("\nFinal result:\n")
     finalList = []
     for value in keptDice.values():
         finalList += value
     
-
-    #TODO : compute the total successes, opportunity and strife gainde from roll
+    # Compute the total successes, opportunity and strife gained from roll
     successes = finalList.count('Success')
     opportunities = finalList.count('Opportunity')
     strife = finalList.count('Strife')
